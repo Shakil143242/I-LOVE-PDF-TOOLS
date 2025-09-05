@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Editor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      color: #333;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+    }
+    
+    .logo {
+      font-size: 2.8rem;
+      margin-bottom: 1.5rem;
+      color: #FF8C00;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+      color: #2c3e50;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      color: #7f8c8d;
+      margin-bottom: 2.5rem;
+      line-height: 1.5;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .drop-zone {
+      width: 100%;
+      padding: 3rem 2rem;
+      border: 2.5px dashed #ddd;
+      border-radius: 15px;
+      background: linear-gradient(180deg, #fff, #fafafb);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .drop-zone.highlight {
+      border-color: #FF8C00;
+      background-color: rgba(255, 140, 0, 0.05);
+    }
+    
+    .file-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      color: #FF8C00;
+    }
+    
+    .select-btn {
+      display: inline-block;
+      background: #FF8C00; /* Orange color as requested */
+      color: white;
+      padding: 1.2rem 3rem;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(255, 140, 0, 0.3);
+      border: none;
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .select-btn:hover {
+      background: #e67e00;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(255, 140, 0, 0.4);
+    }
+    
+    .drop-text {
+      margin-top: 1rem;
+      color: #95a5a6;
+      font-size: 0.95rem;
+    }
+    
+    .conversion-progress {
+      margin: 2rem 0;
+      display: none;
+    }
+    
+    .progress-bar {
+      height: 10px;
+      background: #ecf0f1;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    
+    .progress {
+      height: 100%;
+      background: linear-gradient(90deg, #FF8C00, #e67e00);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+    
+    .progress-text {
+      font-size: 0.95rem;
+      color: #7f8c8d;
+    }
+    
+    .download-page {
+      display: none;
+      text-align: center;
+      width: 100%;
+    }
+    
+    .success-icon {
+      font-size: 5.5rem;
+      color: #27ae60;
+      margin-bottom: 1.5rem;
+    }
+    
+    .download-title {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      color: #2c3e50;
+    }
+    
+    .download-text {
+      font-size: 1.1rem;
+      color: #7f8c8d;
+      margin-bottom: 2.5rem;
+    }
+    
+    .download-btn {
+      display: inline-block;
+      background: #FF8C00;
+      color: white;
+      padding: 1.2rem 3rem;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(255, 140, 0, 0.3);
+      text-decoration: none;
+      margin: 1rem 0;
+      border: none;
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+    }
+    
+    .download-btn:hover {
+      background: #e67e00;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(255, 140, 0, 0.4);
+    }
+    
+    .back-btn {
+      display: inline-block;
+      background: #f8f9fa;
+      color: #7f8c8d;
+      padding: 0.9rem 2.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      margin: 0.5rem;
+      border: 1px solid #ddd;
+      transition: all 0.3s ease;
+    }
+    
+    .back-btn:hover {
+      background: #ecf0f1;
+    }
+    
+    footer {
+      margin-top: 2.5rem;
+      color: #95a5a6;
+      font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .card {
+        padding: 1.8rem;
+      }
+      
+      .drop-zone {
+        padding: 2rem 1rem;
+      }
+      
+      .select-btn, .download-btn {
+        padding: 1rem 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container main-page">
+    <div class="logo">📄</div>
+    <h1>PDF Editor</h1>
+    <p class="subtitle">Edit PDF by adding text, shapes, comments and highlights. Your secure and simple tool to edit PDF.</p>
+    
+    <div class="card">
+      <div class="drop-zone" id="dropZone">
+        <div class="file-icon">📄</div>
+        <button class="select-btn" id="selectBtn">Select PDF File</button>
+        <p class="drop-text">or drop PDF here</p>
+      </div>
+      
+      <div class="conversion-progress" id="conversionProgress">
+        <div class="progress-bar">
+          <div class="progress" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText">Processing your file...</div>
+      </div>
+    </div>
+    
+    <footer>© PDF Editor 2025 - Your PDF Tool</footer>
+  </div>
+  
+  <div class="download-page" id="downloadPage">
+    <div class="success-icon">✅</div>
+    <h2 class="download-title">PDF Ready for Download!</h2>
+    <p class="download-text">Your PDF has been processed and is ready to download.</p>
+    
+    <a href="#" class="download-btn" id="downloadLink">Download PDF</a>
+    <br>
+    <button class="back-btn" id="backBtn">Upload Another File</button>
+  </div>
+
+  <input type="file" id="fileInput" accept=".pdf,application/pdf" style="display: none">
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const selectBtn = document.getElementById('selectBtn');
+      const fileInput = document.getElementById('fileInput');
+      const dropZone = document.getElementById('dropZone');
+      const conversionProgress = document.getElementById('conversionProgress');
+      const progressBar = document.getElementById('progressBar');
+      const progressText = document.getElementById('progressText');
+      const downloadLink = document.getElementById('downloadLink');
+      const backBtn = document.getElementById('backBtn');
+      const mainPage = document.querySelector('.main-page');
+      const downloadPage = document.getElementById('downloadPage');
+      
+      let currentFile = null;
+      
+      // File selection button click
+      selectBtn.addEventListener('click', () => fileInput.click());
+      
+      // File input change
+      fileInput.addEventListener('change', function(e) {
+        if (this.files && this.files.length > 0) {
+          handleFile(this.files[0]);
+        }
+      });
+      
+      // Drag and drop events
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+      });
+      
+      function highlight() {
+        dropZone.classList.add('highlight');
+      }
+      
+      function unhighlight() {
+        dropZone.classList.remove('highlight');
+      }
+      
+      dropZone.addEventListener('drop', function(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files && files.length > 0) {
+          handleFile(files[0]);
+        }
+      });
+      
+      // Back button
+      backBtn.addEventListener('click', function() {
+        mainPage.style.display = 'block';
+        downloadPage.style.display = 'none';
+        fileInput.value = '';
+        conversionProgress.style.display = 'none';
+      });
+      
+      // Handle the selected file
+      function handleFile(file) {
+        // Check if it's a PDF file
+        if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+          alert('Please select a PDF file.');
+          return;
+        }
+        
+        currentFile = file;
+        
+        // Show progress
+        conversionProgress.style.display = 'block';
+        
+        // Simulate processing
+        simulateProcessing();
+      }
+      
+      // Simulate processing
+      function simulateProcessing() {
+        let progress = 0;
+        
+        const interval = setInterval(() => {
+          progress += Math.random() * 10;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            
+            // Show download page after completion
+            setTimeout(() => {
+              mainPage.style.display = 'none';
+              downloadPage.style.display = 'block';
+              
+              // Create download link
+              createDownloadLink(currentFile.name);
+            }, 500);
+          }
+          
+          progressBar.style.width = progress + '%';
+          progressText.textContent = getProgressMessage(progress);
+        }, 200);
+      }
+      
+      // Get progress message based on percentage
+      function getProgressMessage(progress) {
+        if (progress < 30) return 'Uploading file...';
+        if (progress < 60) return 'Analyzing PDF content...';
+        if (progress < 90) return 'Preparing download...';
+        return 'Complete!';
+      }
+      
+      // Create download link
+      function createDownloadLink(originalName) {
+        const baseName = originalName.replace(/\.pdf$/i, '');
+        const fileName = baseName ? baseName + '-edited.pdf' : 'edited.pdf';
+        
+        // In a real application, this would be the URL to the edited file
+        // For demo purposes, we're creating a placeholder
+        const content = `This is a placeholder PDF file for demonstration.\n\nIn a real application, this would be the actual edited PDF file.`;
+        const blob = new Blob([content], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        
+        downloadLink.href = url;
+        downloadLink.download = fileName;
+      }
+    });
+  </script>
+</body>
+</html>
