@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign PDF - eSign Your Documents</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8f6ff 0%, #f5f2f6 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: #e23a2f;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .upload-section {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .upload-area {
+            background: linear-gradient(180deg, #fff, #faf8fb);
+            border: 2px dashed rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            padding: 50px 30px;
+            margin: 30px auto;
+            max-width: 600px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: #e23a2f;
+            background: linear-gradient(180deg, #fff, #f6f2f8);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 16px 40px;
+            background: #e23a2f;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            background: #d32c2c;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(226, 58, 47, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #e23a2f;
+            color: #e23a2f;
+        }
+        
+        .btn-outline:hover {
+            background: #e23a2f;
+            color: white;
+        }
+        
+        .or-text {
+            margin: 20px 0;
+            color: #8b8b95;
+            font-size: 16px;
+            position: relative;
+        }
+        
+        .or-text:before, .or-text:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 100px;
+            height: 1px;
+            background: #e6e6ea;
+        }
+        
+        .or-text:before {
+            left: 30%;
+        }
+        
+        .or-text:after {
+            right: 30%;
+        }
+        
+        .signature-section {
+            display: none;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .canvas-container {
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        
+        #signatureCanvas {
+            border: 2px solid #e6e6ea;
+            border-radius: 10px;
+            background: white;
+            width: 100%;
+            height: 200px;
+            touch-action: none;
+        }
+        
+        .canvas-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .download-page {
+            display: none;
+            padding: 50px 30px;
+            text-align: center;
+        }
+        
+        .download-icon {
+            font-size: 80px;
+            color: #2a9d8f;
+            margin-bottom: 20px;
+        }
+        
+        .file-info {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px auto;
+            max-width: 500px;
+            text-align: left;
+        }
+        
+        .file-info h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .file-info p {
+            margin: 8px 0;
+            color: #666;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 20px;
+            color: #9b9b9f;
+            font-size: 14px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .loading {
+            display: none;
+            margin: 20px 0;
+            color: #e23a2f;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+            
+            .upload-area {
+                padding: 30px 15px;
+            }
+            
+            .btn {
+                padding: 14px 30px;
+                font-size: 16px;
+            }
+            
+            .or-text:before, .or-text:after {
+                width: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sign PDF</h1>
+            <p class="subtitle">Your tool to eSign documents. Sign a document yourself or send a signature request to others.</p>
+        </header>
+        
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-area">
+                <h2>Select PDF File</h2>
+                <p>Choose a PDF file to sign electronically</p>
+                <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+                <button class="btn" id="selectBtn">Select PDF File</button>
+                <p class="or-text">or</p>
+                <p>Drop PDF file here</p>
+            </div>
+        </div>
+        
+        <div class="signature-section" id="signatureSection">
+            <h2>Draw Your Signature</h2>
+            <p>Use your mouse or touchscreen to sign the document</p>
+            
+            <div class="canvas-container">
+                <canvas id="signatureCanvas"></canvas>
+                <div class="canvas-controls">
+                    <button class="btn btn-outline" id="clearBtn">Clear Signature</button>
+                    <button class="btn" id="applyBtn">Apply Signature</button>
+                </div>
+            </div>
+            <div class="loading" id="signingLoading">Signing your document, please wait...</div>
+        </div>
+        
+        <div class="download-page" id="downloadPage">
+            <div class="download-icon">✓</div>
+            <h2>Your Signed PDF is Ready!</h2>
+            <p>Your document has been successfully signed and is ready for download</p>
+            
+            <div class="file-info">
+                <h3>Document Information</h3>
+                <p><strong>File Name:</strong> <span id="fileName">document-signed.pdf</span></p>
+                <p><strong>Signed On:</strong> <span id="signDate"></span></p>
+                <p><strong>File Size:</strong> <span id="fileSize">1.2 MB</span></p>
+            </div>
+            
+            <button class="btn" id="downloadBtn">Download Signed PDF</button>
+            <p><button class="btn btn-outline" id="newDocumentBtn">Sign Another Document</button></p>
+        </div>
+        
+        <footer>
+            <p>© 2025 PDF Tools • Your PDF Editor</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const uploadSection = document.getElementById('uploadSection');
+            const signatureSection = document.getElementById('signatureSection');
+            const downloadPage = document.getElementById('downloadPage');
+            const fileInput = document.getElementById('fileInput');
+            const selectBtn = document.getElementById('selectBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const applyBtn = document.getElementById('applyBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const newDocumentBtn = document.getElementById('newDocumentBtn');
+            const canvas = document.getElementById('signatureCanvas');
+            const fileName = document.getElementById('fileName');
+            const signDate = document.getElementById('signDate');
+            const fileSize = document.getElementById('fileSize');
+            const signingLoading = document.getElementById('signingLoading');
+            
+            // Canvas context
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            let selectedFile = null;
+            let signedPdfBytes = null;
+            
+            // Set current date
+            const now = new Date();
+            signDate.textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+            
+            // Set up canvas
+            function resizeCanvas() {
+                const ratio = window.devicePixelRatio || 1;
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                ctx.scale(ratio, ratio);
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#333';
+            }
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Canvas drawing functions
+            function startDrawing(e) {
+                isDrawing = true;
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            // Canvas event listeners
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile devices
+            canvas.addEventListener('touchstart', e => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+            
+            canvas.addEventListener('touchmove', e => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+            
+            canvas.addEventListener('touchend', e => {
+                e.preventDefault();
+                const mouseEvent = new MouseEvent('mouseup', {});
+                canvas.dispatchEvent(mouseEvent);
+            });
+            
+            // Clear signature
+            clearBtn.addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+            
+            // File selection
+            selectBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelection(e.target.files[0]);
+                }
+            });
+            
+            // Handle file selection (from input or drop)
+            function handleFileSelection(file) {
+                if (file.type === 'application/pdf') {
+                    selectedFile = file;
+                    fileName.textContent = selectedFile.name.replace('.pdf', '-signed.pdf');
+                    fileSize.textContent = (selectedFile.size / 1024 / 1024).toFixed(2) + ' MB';
+                    
+                    // Show signature section
+                    uploadSection.style.display = 'none';
+                    signatureSection.style.display = 'block';
+                } else {
+                    alert('Please select a PDF file.');
+                }
+            }
+            
+            // Apply signature to PDF
+            applyBtn.addEventListener('click', async () => {
+                if (canvas.width === 0) {
+                    alert('Please provide a signature first.');
+                    return;
+                }
+                
+                // Show loading
+                signingLoading.style.display = 'block';
+                applyBtn.disabled = true;
+                
+                try {
+                    // Convert canvas to PNG image
+                    const signatureDataUrl = canvas.toDataURL('image/png');
+                    
+                    // Load the PDF
+                    const arrayBuffer = await selectedFile.arrayBuffer();
+                    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+                    
+                    // Embed the signature image
+                    const signatureImage = await pdfDoc.embedPng(signatureDataUrl);
+                    const pages = pdfDoc.getPages();
+                    const firstPage = pages[0];
+                    
+                    // Get page dimensions
+                    const { width, height } = firstPage.getSize();
+                    
+                    // Add signature to the first page (bottom right corner)
+                    firstPage.drawImage(signatureImage, {
+                        x: width - 180,
+                        y: 50,
+                        width: 150,
+                        height: 60,
+                    });
+                    
+                    // Add signing timestamp text
+                    firstPage.drawText(`Signed on: ${new Date().toLocaleString()}`, {
+                        x: width - 350,
+                        y: 30,
+                        size: 10,
+                        color: PDFLib.rgb(0.5, 0.5, 0.5),
+                    });
+                    
+                    // Save the PDF
+                    signedPdfBytes = await pdfDoc.save();
+                    
+                    // Show download page
+                    signatureSection.style.display = 'none';
+                    downloadPage.style.display = 'block';
+                } catch (error) {
+                    console.error('Error signing PDF:', error);
+                    alert('An error occurred while signing the PDF. Please try again.');
+                } finally {
+                    signingLoading.style.display = 'none';
+                    applyBtn.disabled = false;
+                }
+            });
+            
+            // Download PDF
+            downloadBtn.addEventListener('click', () => {
+                if (signedPdfBytes) {
+                    // Create a blob and download link
+                    const blob = new Blob([signedPdfBytes], { type: 'application/pdf' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    
+                    a.href = url;
+                    a.download = fileName.textContent;
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // Clean up
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                }
+            });
+            
+            // New document
+            newDocumentBtn.addEventListener('click', () => {
+                // Reset the UI
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                fileInput.value = '';
+                signedPdfBytes = null;
+                downloadPage.style.display = 'none';
+                uploadSection.style.display = 'block';
+            });
+            
+            // Drag and drop functionality
+            const uploadArea = document.querySelector('.upload-area');
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#e23a2f';
+                uploadArea.style.backgroundColor = '#f6f2f8';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+                uploadArea.style.background = 'linear-gradient(180deg, #fff, #faf8fb)';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+                uploadArea.style.background = 'linear-gradient(180deg, #fff, #faf8fb)';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    handleFileSelection(e.dataTransfer.files[0]);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
