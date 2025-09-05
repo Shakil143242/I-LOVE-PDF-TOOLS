@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PDF to WORD Converter</title>
+
+  <!-- Montserrat font like sample -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- pdf.js (for reading PDF) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.min.js"></script>
+
+  <!-- docx.js (for generating .docx) -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@7.6.0/build/index.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f5f4f8;
+      --muted:#7a7a86;
+      --accent:#e23a2f; /* red */
+      --card:#ffffff;
+      --success:#4CAF50;
+    }
+    *{box-sizing:border-box;font-family: 'Montserrat', system-ui, sans-serif;}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--bg);
+      color:#222;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:28px;
+    }
+
+    .container{
+      width:100%;
+      max-width:920px;
+    }
+
+    header{
+      text-align:center;
+      padding:28px 8px 12px;
+    }
+    header h1{
+      margin:0;
+      font-size:42px;
+      font-weight:700;
+      letter-spacing:0.5px;
+    }
+    header p{
+      margin:10px 0 0;
+      color:var(--muted);
+      font-size:16px;
+    }
+
+    .uploader{
+      margin-top:22px;
+      display:flex;
+      gap:20px;
+      align-items:flex-start;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    .drop-area{
+      background:linear-gradient(180deg, #fff, #faf8fb);
+      border-radius:12px;
+      box-shadow:0 6px 18px rgba(18,18,18,0.06);
+      padding:26px;
+      width:540px;
+      text-align:center;
+    }
+    .big-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      background:var(--accent);
+      color:#fff;
+      border-radius:10px;
+      padding:14px 28px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 6px 12px rgba(226,58,47,0.18);
+      border:none;
+      font-size:16px;
+    }
+    .small-note{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    input[type=file]{ display:none; }
+
+    /* side */
+    .side{
+      width:320px;
+      max-height:640px;
+      overflow:auto;
+    }
+    .panel{
+      background:var(--card);
+      border-radius:12px;
+      padding:12px;
+      box-shadow:0 6px 18px rgba(18,18,18,0.04);
+    }
+
+    .file-info{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:10px;
+      border-radius:8px;
+      margin-bottom:8px;
+    }
+    .file-info .meta{ flex:1; font-size:13px; color:#333; }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+      justify-content:center;
+    }
+    .btn{
+      padding:10px 12px;
+      border-radius:8px;
+      border:0;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .btn.ghost{ background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+    .btn.primary{ background:var(--accent); color:#fff; box-shadow:0 6px 12px rgba(226,58,47,0.14); }
+
+    /* result */
+    .result-embed{
+      margin-top:18px;
+    }
+    .result-embed iframe{
+      width:100%;
+      height:480px;
+      border-radius:8px;
+      border:1px solid #e9e9ef;
+    }
+
+    .drop-area.dragover{ border:2px dashed rgba(0,0,0,0.08); }
+
+    .progress{
+      height:8px;
+      background:#eee;
+      border-radius:6px;
+      overflow:hidden;
+      margin-top:12px;
+    }
+    .progress > div{ height:100%; width:0%; transition:width 240ms ease; background:linear-gradient(90deg, #ff8a80, #e23a2f); }
+
+    /* Download page styles */
+    .download-page{
+      display:none;
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:var(--bg);
+      z-index:1000;
+      padding:20px;
+      overflow-y:auto;
+    }
+    .download-container{
+      max-width:600px;
+      margin:60px auto;
+      background:white;
+      padding:30px;
+      border-radius:12px;
+      text-align:center;
+      box-shadow:0 6px 18px rgba(0,0,0,.06);
+    }
+    .download-icon{
+      font-size:60px;
+      color:var(--success);
+      margin-bottom:20px;
+    }
+    .download-btn{
+      display:inline-block;
+      background:var(--accent);
+      color:white;
+      padding:16px 36px;
+      border-radius:12px;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      margin-top:20px;
+      border:none;
+    }
+    .back-btn{
+      display:inline-block;
+      margin-top:20px;
+      color:var(--muted);
+      cursor:pointer;
+    }
+
+    @media(max-width:900px){
+      .uploader{ flex-direction:column; align-items:center; }
+      .drop-area{ width:100%; max-width:760px; }
+      .side{ width:100%; }
+      header h1{ font-size:34px; }
+      .download-container{
+        padding:20px;
+        margin:30px auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>PDF to WORD Converter</h1>
+      <p>Convert your PDF to WORD documents with incredible accuracy.</p>
+    </header>
+
+    <div class="uploader">
+      <!-- left: drop/select -->
+      <div class="drop-area panel" id="dropArea">
+        <label class="big-btn" id="selectBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="opacity:0.95">
+            <path d="M12 3v12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 10l7-7 7 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Select PDF file
+        </label>
+
+        <input id="fileInput" type="file" accept="application/pdf" />
+
+        <div class="small-note">or drop PDF here</div>
+
+        <div class="progress" style="display:none;margin-top:16px"><div id="progressBar"></div></div>
+
+        <div class="controls" style="margin-top:18px;">
+          <button class="btn ghost" id="clearBtn" disabled>Clear</button>
+          <button class="btn primary" id="convertBtn" disabled>Convert to WORD</button>
+        </div>
+
+        <div id="mobileInfo" style="margin-top:16px;color:var(--muted);font-size:13px"></div>
+      </div>
+
+      <!-- right side: file list + result -->
+      <div class="side">
+        <div class="panel" id="filePanel">
+          <h3 style="margin:0 0 8px 0;">Selected PDF</h3>
+          <div id="fileList"><div style="color:var(--muted)">No file selected.</div></div>
+        </div>
+
+        <div class="panel" style="margin-top:12px;">
+          <h3 style="margin:0 0 8px 0;">Result</h3>
+          <div id="resultArea">
+            <div style="color:var(--muted); font-size:14px">No Word file yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="preview" class="result-embed"></div>
+  </div>
+
+  <!-- Download page -->
+  <div class="download-page" id="downloadPage">
+    <div class="download-container">
+      <div class="download-icon">✓</div>
+      <h2>Your Word Document is Ready!</h2>
+      <p>Click the button below to download your converted Word file.</p>
+      <a href="#" class="download-btn" id="finalDownloadLink">Download .docx</a>
+      <div class="back-btn" id="backBtn">← Back to Converter</div>
+    </div>
+  </div>
+
+<script>
+(async function(){
+  // pdf.js worker setup
+  if(window.pdfjsLib){
+    // use CDN worker (embedded) - fallback to built-in if provided by CDN
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.worker.min.js';
+  }
+
+  const { Document, Packer, Paragraph, TextRun } = window.docx || {};
+  const fileInput = document.getElementById('fileInput');
+  const selectBtn = document.getElementById('selectBtn');
+  const dropArea = document.getElementById('dropArea');
+  const fileList = document.getElementById('fileList');
+  const convertBtn = document.getElementById('convertBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const resultArea = document.getElementById('resultArea');
+  const preview = document.getElementById('preview');
+  const progress = document.querySelector('.progress');
+  const progressBar = document.getElementById('progressBar');
+  const mobileInfo = document.getElementById('mobileInfo');
+  const downloadPage = document.getElementById('downloadPage');
+  const finalDownloadLink = document.getElementById('finalDownloadLink');
+  const backBtn = document.getElementById('backBtn');
+
+  let selectedFile = null;
+  let docxUrl = null;
+
+  function resetUI(){
+    fileList.innerHTML = '<div style="color:var(--muted)">No file selected.</div>';
+    resultArea.innerHTML = '<div style="color:var(--muted); font-size:14px">No Word file yet</div>';
+    preview.innerHTML = '';
+    convertBtn.disabled = true;
+    clearBtn.disabled = true;
+    progress.style.display = 'none';
+    progressBar.style.width = '0%';
+    mobileInfo.textContent = '';
+    
+    // Clean up URL if it exists
+    if (docxUrl) {
+      URL.revokeObjectURL(docxUrl);
+      docxUrl = null;
+    }
+  }
+  resetUI();
+
+  // select file
+  selectBtn.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if(!f) return;
+    handleFile(f);
+  });
+
+  // drag & drop
+  ['dragenter','dragover'].forEach(ev => {
+    dropArea.addEventListener(ev, (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      dropArea.classList.add('dragover');
+    });
+  });
+  ['dragleave','drop'].forEach(ev => {
+    dropArea.addEventListener(ev, (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      dropArea.classList.remove('dragover');
+    });
+  });
+  dropArea.addEventListener('drop', (e)=>{
+    const dt = e.dataTransfer;
+    if(!dt) return;
+    const file = dt.files[0];
+    if(file && file.type === 'application/pdf') handleFile(file);
+    else alert('Please drop a PDF file.');
+  });
+
+  function handleFile(f){
+    selectedFile = f;
+    fileList.innerHTML = `
+      <div class="file-info">
+        <div style="width:48px;height:48px;border-radius:6px;background:linear-gradient(180deg,#f6f6f9,#fff);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--muted)">PDF</div>
+        <div class="meta">
+          <div style="font-weight:700">${escapeHtml(f.name)}</div>
+          <div style="font-size:13px;color:var(--muted)">${(f.size/1024/1024).toFixed(2)} MB</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button id="removeFile" class="btn ghost">Remove</button>
+        </div>
+      </div>
+    `;
+    convertBtn.disabled = false;
+    clearBtn.disabled = false;
+
+    document.getElementById('removeFile').addEventListener('click', ()=>{
+      selectedFile = null;
+      fileInput.value = '';
+      resetUI();
+    });
+
+    // mobile hint if large file
+    if(f.size > 5*1024*1024) {
+      mobileInfo.textContent = 'Tip: Large PDFs may take longer to convert in-browser. For best results use desktop or use server-side conversion.';
+    } else mobileInfo.textContent = '';
+  }
+
+  clearBtn.addEventListener('click', ()=>{
+    selectedFile = null;
+    fileInput.value = '';
+    resetUI();
+  });
+
+  // Set up back button
+  backBtn.addEventListener('click', () => {
+    downloadPage.style.display = 'none';
+  });
+
+  convertBtn.addEventListener('click', async ()=>{
+    if(!selectedFile) return;
+    convertBtn.disabled = true;
+    convertBtn.textContent = 'Converting...';
+    progress.style.display = 'block';
+    progressBar.style.width = '2%';
+    resultArea.innerHTML = '<div style="color:var(--muted)">Extracting text from PDF...</div>';
+    preview.innerHTML = '';
+
+    try {
+      const arrayBuffer = await readFileAsArrayBuffer(selectedFile);
+      progressBar.style.width = '8%';
+
+      // load PDF via pdf.js
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdf = await loadingTask.promise;
+      const numPages = pdf.numPages;
+      progressBar.style.width = '12%';
+
+      // gather text per page
+      const pagesText = [];
+      for(let p=1; p<=numPages; p++){
+        const page = await pdf.getPage(p);
+        const textContent = await page.getTextContent();
+        // textContent.items is array of text runs
+        const pageText = textContent.items.map(i => i.str).join(' ');
+        pagesText.push(pageText.trim() || '');
+        // update progress
+        const pct = 12 + Math.round((p/numPages) * 70);
+        progressBar.style.width = pct + '%';
+        // small yield to keep UI responsive
+        await new Promise(r => setTimeout(r, 50));
+      }
+
+      // Build .docx document using docx.js
+      resultArea.innerHTML = '<div style="color:var(--muted)">Creating Word (.docx) file...</div>';
+      progressBar.style.width = '85%';
+
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: pagesText.flatMap(pt => {
+            // split page text into paragraphs approx by newline or 500 char chunks
+            const paraChunks = splitIntoChunks(pt, 800);
+            return paraChunks.map(chunk => new Paragraph({ children: [ new TextRun({ text: chunk }) ] }));
+          })
+        }]
+      });
+
+      // generate blob
+      const blob = await Packer.toBlob(doc);
+      progressBar.style.width = '98%';
+
+      // create url and show download link + preview snippet
+      docxUrl = URL.createObjectURL(blob);
+      const fileName = selectedFile.name.replace(/\.pdf$/i, '') + '.docx';
+
+      resultArea.innerHTML = `
+        <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap">
+          <div style="font-weight:600">Your Word file is ready</div>
+          <div style="display:flex; gap:8px;">
+            <button id="selectPdfBtn" class="btn primary">Select PDF File</button>
+          </div>
+        </div>
+        <div style="margin-top:10px;color:var(--muted);font-size:13px">
+          Note: This conversion preserves extracted text. Complex layout, tables and images may require server-side conversion for perfect fidelity.
+        </div>
+      `;
+
+      // Add event listener to the new button
+      document.getElementById('selectPdfBtn').addEventListener('click', () => {
+        // Show the download page
+        downloadPage.style.display = 'block';
+        
+        // Set up the download link
+        finalDownloadLink.href = docxUrl;
+        finalDownloadLink.download = fileName;
+      });
+
+    } catch(err) {
+      console.error(err);
+      resultArea.innerHTML = `<div style="color:#b00020">Error: ${escapeHtml(err.message || String(err))}</div>`;
+    } finally {
+      convertBtn.disabled = false;
+      convertBtn.textContent = 'Convert to WORD';
+      progressBar.style.width = '100%';
+      setTimeout(()=>{ progress.style.display = 'none'; progressBar.style.width = '0%'; }, 800);
+    }
+  });
+
+  // helpers
+  function readFileAsArrayBuffer(file){
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = () => rej(new Error('Failed to read file'));
+      r.readAsArrayBuffer(file);
+    });
+  }
+
+  function splitIntoChunks(text, maxLen=800){
+    if(!text) return [''];
+    const parts = [];
+    let start = 0;
+    while(start < text.length){
+      parts.push(text.slice(start, start+maxLen));
+      start += maxLen;
+    }
+    return parts;
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
+  function formatPreviewHTML(text){
+    const safe = escapeHtml(text).replace(/\n/g,'<br/>');
+    return `
+      <div style="font-family:Montserrat,system-ui, sans-serif;padding:18px;">
+        <h3 style="margin-top:0">Preview — first page text</h3>
+        <div style="white-space:pre-wrap;line-height:1.45;color:#222">${safe}</div>
+      </div>
+    `;
+  }
+
+})();
+</script>
+</body>
+</html>
