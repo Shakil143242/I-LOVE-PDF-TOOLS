@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Watermark Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+    
+    header {
+      text-align: center;
+      padding: 40px 30px 30px;
+      background: white;
+    }
+    
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #222;
+    }
+    
+    .subtitle {
+      font-size: 18px;
+      color: #666;
+      line-height: 1.5;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent 0%, #eee 15%, #eee 85%, transparent 100%);
+      margin: 25px 0;
+    }
+    
+    .upload-container {
+      padding: 0 30px 40px;
+      text-align: center;
+    }
+    
+    .upload-box {
+      border: 2px dashed #ddd;
+      border-radius: 12px;
+      padding: 50px 30px;
+      background: #fafafa;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .upload-box:hover {
+      border-color: #ff4b4b;
+      background: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .upload-icon {
+      font-size: 48px;
+      color: #ff4b4b;
+      margin-bottom: 20px;
+    }
+    
+    .upload-text {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #444;
+    }
+    
+    .upload-note {
+      color: #888;
+      font-size: 16px;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    .upload-btn {
+      display: inline-block;
+      margin-top: 25px;
+      background: #ff4b4b;
+      color: white;
+      padding: 16px 42px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(255, 75, 75, 0.25);
+    }
+    
+    .upload-btn:hover {
+      background: #e84343;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(255, 75, 75, 0.3);
+    }
+    
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      padding: 40px 30px;
+      background: #f8f9fa;
+      border-top: 1px solid #eee;
+    }
+    
+    .feature {
+      text-align: center;
+      width: 180px;
+    }
+    
+    .feature-icon {
+      font-size: 32px;
+      color: #ff4b4b;
+      margin-bottom: 15px;
+    }
+    
+    .feature-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #444;
+    }
+    
+    .feature-desc {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #888;
+      font-size: 14px;
+      background: #f8f9fa;
+      border-top: 1px solid #eee;
+    }
+    
+    /* Download Page Styles */
+    .download-page {
+      display: none;
+      text-align: center;
+      padding: 50px 30px;
+    }
+    
+    .download-icon {
+      font-size: 70px;
+      color: #4CAF50;
+      margin-bottom: 25px;
+    }
+    
+    .download-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #222;
+    }
+    
+    .download-text {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 30px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .download-btn {
+      display: inline-block;
+      background: #4CAF50;
+      color: white;
+      padding: 16px 42px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(76, 175, 80, 0.25);
+      text-decoration: none;
+      margin: 10px;
+    }
+    
+    .download-btn:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3);
+    }
+    
+    .back-btn {
+      display: inline-block;
+      background: #6c757d;
+      color: white;
+      padding: 16px 42px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      margin: 10px;
+    }
+    
+    .back-btn:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+    
+    .progress-bar {
+      width: 100%;
+      background-color: #f1f1f1;
+      border-radius: 10px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    
+    .progress {
+      width: 0%;
+      height: 10px;
+      background-color: #4CAF50;
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+    
+    .loading-text {
+      margin: 15px 0;
+      color: #666;
+    }
+    
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 28px;
+      }
+      
+      .subtitle {
+        font-size: 16px;
+      }
+      
+      .upload-text {
+        font-size: 18px;
+      }
+      
+      .upload-btn, .download-btn, .back-btn {
+        padding: 14px 32px;
+        font-size: 16px;
+      }
+      
+      .features {
+        gap: 20px;
+      }
+      
+      .feature {
+        width: 140px;
+      }
+      
+      .download-title {
+        font-size: 24px;
+      }
+      
+      .download-text {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Upload Page -->
+    <div id="uploadPage">
+      <header>
+        <h1>Add watermark into a PDF</h1>
+        <p class="subtitle">Stamp an image or text over your PDF in seconds. Choose the typography, transparency and position.</p>
+      </header>
+      
+      <div class="divider"></div>
+      
+      <div class="upload-container">
+        <div class="upload-box" id="uploadBox">
+          <i class="upload-icon fas fa-file-pdf"></i>
+          <p class="upload-text">Select PDF file</p>
+          <p class="upload-note">or drop PDF here</p>
+        </div>
+        <input type="file" id="fileInput" class="file-input" accept="application/pdf">
+        
+        <div class="upload-btn" id="uploadBtn">Select PDF File</div>
+      </div>
+      
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">
+            <i class="fas fa-font"></i>
+          </div>
+          <div class="feature-title">Typography</div>
+          <div class="feature-desc">Choose from various font styles and sizes</div>
+        </div>
+        
+        <div class="feature">
+          <div class="feature-icon">
+            <i class="fas fa-adjust"></i>
+          </div>
+          <div class="feature-title">Transparency</div>
+          <div class="feature-desc">Adjust opacity to make it subtle or prominent</div>
+        </div>
+        
+        <div class="feature">
+          <div class="feature-icon">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <div class="feature-title">Position</div>
+          <div class="feature-desc">Place watermark anywhere on the page</div>
+        </div>
+      </div>
+      
+      <footer>
+        <p>© 2025 PDF Watermark Tool. All rights reserved.</p>
+      </footer>
+    </div>
+    
+    <!-- Download Page -->
+    <div class="download-page" id="downloadPage">
+      <i class="download-icon fas fa-check-circle"></i>
+      <h2 class="download-title">Your Watermarked PDF is Ready!</h2>
+      <p class="download-text">Your PDF has been successfully processed with the watermark. You can now download it.</p>
+      
+      <div class="progress-bar">
+        <div class="progress" id="progressBar"></div>
+      </div>
+      
+      <p class="loading-text" id="statusText">Processing complete!</p>
+      
+      <a href="#" class="download-btn" id="downloadBtn">
+        <i class="fas fa-download"></i> Download PDF
+      </a>
+      <div class="back-btn" id="backBtn">
+        <i class="fas fa-arrow-left"></i> Process Another PDF
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const uploadPage = document.getElementById('uploadPage');
+      const downloadPage = document.getElementById('downloadPage');
+      const uploadBox = document.getElementById('uploadBox');
+      const uploadBtn = document.getElementById('uploadBtn');
+      const fileInput = document.getElementById('fileInput');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const backBtn = document.getElementById('backBtn');
+      const progressBar = document.getElementById('progressBar');
+      const statusText = document.getElementById('statusText');
+      
+      let watermarkedPdfBytes = null;
+      
+      // Click events for file selection
+      uploadBox.addEventListener('click', () => fileInput.click());
+      uploadBtn.addEventListener('click', () => fileInput.click());
+      
+      // Drag and drop functionality
+      uploadBox.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ff4b4b';
+        this.style.backgroundColor = '#fff';
+      });
+      
+      uploadBox.addEventListener('dragleave', function() {
+        this.style.borderColor = '#ddd';
+        this.style.backgroundColor = '#fafafa';
+      });
+      
+      uploadBox.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ddd';
+        this.style.backgroundColor = '#fafafa';
+        
+        const files = e.dataTransfer.files;
+        if (files.length && files[0].type === 'application/pdf') {
+          handleFile(files[0]);
+        } else {
+          alert('Please drop a valid PDF file.');
+        }
+      });
+      
+      fileInput.addEventListener('change', function() {
+        if (this.files.length) {
+          handleFile(this.files[0]);
+        }
+      });
+      
+      // Back button event
+      backBtn.addEventListener('click', function() {
+        downloadPage.style.display = 'none';
+        uploadPage.style.display = 'block';
+        fileInput.value = '';
+        watermarkedPdfBytes = null;
+      });
+      
+      // Download button event
+      downloadBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        if (watermarkedPdfBytes) {
+          // Create a Blob from the PDF bytes
+          const blob = new Blob([watermarkedPdfBytes], { type: 'application/pdf' });
+          
+          // Create a download URL
+          const url = URL.createObjectURL(blob);
+          
+          // Create a temporary anchor element for downloading
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'watermarked.pdf';
+          document.body.appendChild(a);
+          a.click();
+          
+          // Clean up
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }, 100);
+        } else {
+          alert('No watermarked PDF available for download. Please process a PDF first.');
+        }
+      });
+      
+      async function handleFile(file) {
+        if (file.type !== 'application/pdf') {
+          alert('Please select a PDF file.');
+          return;
+        }
+        
+        // Show processing animation
+        simulateProcessing(file);
+      }
+      
+      async function simulateProcessing(file) {
+        // Hide upload page and show download page
+        uploadPage.style.display = 'none';
+        downloadPage.style.display = 'block';
+        statusText.textContent = 'Processing your PDF...';
+        
+        // Simulate processing progress
+        let width = 0;
+        const interval = setInterval(() => {
+          if (width >= 100) {
+            clearInterval(interval);
+            processPdfWithWatermark(file);
+          } else {
+            width += 5;
+            progressBar.style.width = width + '%';
+          }
+        }, 100);
+      }
+      
+      async function processPdfWithWatermark(file) {
+        try {
+          statusText.textContent = 'Adding watermark...';
+          
+          // Read the PDF file as an ArrayBuffer
+          const arrayBuffer = await file.arrayBuffer();
+          
+          // Load the PDF document
+          const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+          
+          // Get all pages
+          const pages = pdfDoc.getPages();
+          const firstPage = pages[0];
+          const { width, height } = firstPage.getSize();
+          
+          // Add watermark to each page
+          pages.forEach(page => {
+            page.drawText('CONFIDENTIAL', {
+              x: width / 4,
+              y: height / 2,
+              size: 50,
+              color: PDFLib.rgb(0.95, 0.1, 0.1),
+              opacity: 0.4,
+              rotate: PDFLib.degrees(30),
+            });
+          });
+          
+          // Save the PDF with watermark
+          watermarkedPdfBytes = await pdfDoc.save();
+          
+          // Update UI to show completion
+          progressBar.style.width = '100%';
+          statusText.textContent = 'Processing complete! Your PDF is ready to download.';
+          
+        } catch (error) {
+          console.error('Error processing PDF:', error);
+          statusText.textContent = 'Error processing PDF. Please try again with a different file.';
+          progressBar.style.backgroundColor = '#ff4b4b';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
