@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR PDF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f6f7fb;
+            --accent: #e64742;
+            --muted: #6f6f76;
+            --dark: #111;
+            --success: #43a047;
+            --card: #fff;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Montserrat', system-ui, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 820px;
+            width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        header {
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 36px;
+            margin: 12px 0 6px;
+            font-weight: 800;
+            color: var(--dark);
+        }
+        
+        .lead {
+            color: var(--muted);
+            font-size: 18px;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+        
+        .uploader {
+            background: white;
+            padding: 36px 46px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone {
+            width: 440px;
+            max-width: 80vw;
+            padding: 28px;
+            border-radius: 10px;
+            border: 2px dashed rgba(0, 0, 0, 0.06);
+            background: linear-gradient(180deg, #fff, #fbfbfc);
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.active {
+            border-color: var(--accent);
+            background: linear-gradient(180deg, #fff, #fcf0f0);
+        }
+        
+        .select-btn {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 18px 44px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(198, 57, 53, 0.18);
+            border: none;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+        
+        .select-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(198, 57, 53, 0.25);
+        }
+        
+        .select-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+        
+        .icons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #d1413d;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        .small {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 12px;
+        }
+        
+        footer {
+            margin-top: 48px;
+            padding: 12px 6px;
+            color: #9b9b9f;
+            font-size: 13px;
+        }
+        
+        /* Result Section */
+        .result-section {
+            display: none;
+            background: white;
+            padding: 36px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--success);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: var(--success);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(67, 160, 71, 0.3);
+            border: none;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(67, 160, 71, 0.4);
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .file-details {
+            text-align: left;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .file-size {
+            font-size: 12px;
+            color: var(--muted);
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #7bc4ff, #4f8ef2);
+            transition: width 0.4s ease;
+        }
+        
+        /* Language Selector */
+        .language-selector {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        
+        .language-btn {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--muted);
+            transition: all 0.2s ease;
+        }
+        
+        .language-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 8px;
+            width: 180px;
+            z-index: 100;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .language-dropdown.show {
+            display: block;
+        }
+        
+        .language-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+        
+        .language-option:hover {
+            background: #f5f5f5;
+        }
+        
+        .language-option.active {
+            background: #f0f7ff;
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .flag {
+            width: 20px;
+            height: 15px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+        
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 28px;
+            }
+            
+            .select-btn {
+                padding: 14px 26px;
+            }
+            
+            .uploader, .result-section {
+                padding: 24px;
+            }
+            
+            .drop-zone {
+                padding: 20px;
+            }
+            
+            .language-selector {
+                position: relative;
+                margin-bottom: 20px;
+                display: flex;
+                justify-content: center;
+            }
+            
+            .language-dropdown {
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="language-selector">
+                <div class="language-btn" id="languageBtn">
+                    <span>🌐</span>
+                    <span id="currentLanguage">English</span>
+                    <span>▼</span>
+                </div>
+                <div class="language-dropdown" id="languageDropdown">
+                    <div class="language-option active" data-lang="en">
+                        <span>🇺🇸</span>
+                        <span>English</span>
+                    </div>
+                    <div class="language-option" data-lang="es">
+                        <span>🇪🇸</span>
+                        <span>Español</span>
+                    </div>
+                    <div class="language-option" data-lang="fr">
+                        <span>🇫🇷</span>
+                        <span>Français</span>
+                    </div>
+                    <div class="language-option" data-lang="de">
+                        <span>🇩🇪</span>
+                        <span>Deutsch</span>
+                    </div>
+                    <div class="language-option" data-lang="it">
+                        <span>🇮🇹</span>
+                        <span>Italiano</span>
+                    </div>
+                    <div class="language-option" data-lang="pt">
+                        <span>🇵🇹</span>
+                        <span>Português</span>
+                    </div>
+                    <div class="language-option" data-lang="ru">
+                        <span>🇷🇺</span>
+                        <span>Русский</span>
+                    </div>
+                    <div class="language-option" data-lang="zh">
+                        <span>🇨🇳</span>
+                        <span>中文</span>
+                    </div>
+                    <div class="language-option" data-lang="ja">
+                        <span>🇯🇵</span>
+                        <span>日本語</span>
+                    </div>
+                    <div class="language-option" data-lang="hi">
+                        <span>🇮🇳</span>
+                        <span>हिंदी</span>
+                    </div>
+                </div>
+            </div>
+            <h1 data-translate="title">OCR PDF</h1>
+            <p class="lead" data-translate="description">Convert non-selectable PDF files into selectable and searchable PDF with high accuracy.</p>
+        </header>
+        
+        <!-- Upload Section -->
+        <div class="uploader" id="uploadSection">
+            <div class="drop-zone" id="dropZone">
+                <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 18px; padding: 6px">
+                    <div class="select-row">
+                        <label class="select-btn" id="selectBtn" data-translate="selectButton">Select PDF file</label>
+                        <div class="icons" style="margin-left: 10px">
+                            <div class="icon">O</div>
+                            <div class="icon">C</div>
+                            <div class="icon">R</div>
+                        </div>
+                    </div>
+                    <div class="small" data-translate="dropText">or drop PDF here</div>
+                    <input type="file" id="fileInput" accept=".pdf,application/pdf" style="display: none">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Result Section -->
+        <div class="result-section" id="resultSection">
+            <div class="success-icon">✓</div>
+            <h2 data-translate="successTitle">OCR Process Complete!</h2>
+            <div class="file-info">
+                <div class="file-icon">PDF</div>
+                <div class="file-details">
+                    <div class="file-name" id="fileName">document.pdf</div>
+                    <div class="file-size" id="fileSize">0.0 MB</div>
+                </div>
+            </div>
+            <p data-translate="successMessage">Your PDF has been processed with OCR and is now searchable.</p>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div id="progressText" style="color: var(--muted); font-size: 14px; margin-bottom: 20px;" data-translate="processing">Processing...</div>
+            <a href="#" class="download-btn" id="downloadLink" style="display: none;" data-translate="downloadButton">Download OCR PDF</a>
+            <div class="back-btn" id="backBtn" data-translate="backButton">Process another PDF</div>
+        </div>
+        
+        <footer data-translate="footer">© PDF Tools 2025 • Your PDF Editor</footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectBtn = document.getElementById('selectBtn');
+            const fileInput = document.getElementById('fileInput');
+            const dropZone = document.getElementById('dropZone');
+            const uploadSection = document.getElementById('uploadSection');
+            const resultSection = document.getElementById('resultSection');
+            const downloadLink = document.getElementById('downloadLink');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const backBtn = document.getElementById('backBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            // Language selection elements
+            const languageBtn = document.getElementById('languageBtn');
+            const languageDropdown = document.getElementById('languageDropdown');
+            const currentLanguage = document.getElementById('currentLanguage');
+            const languageOptions = document.querySelectorAll('.language-option');
+            
+            // Language translations
+            const translations = {
+                en: {
+                    title: "OCR PDF",
+                    description: "Convert non-selectable PDF files into selectable and searchable PDF with high accuracy.",
+                    selectButton: "Select PDF file",
+                    dropText: "or drop PDF here",
+                    successTitle: "OCR Process Complete!",
+                    successMessage: "Your PDF has been processed with OCR and is now searchable.",
+                    downloadButton: "Download OCR PDF",
+                    backButton: "Process another PDF",
+                    footer: "© PDF Tools 2025 • Your PDF Editor",
+                    processing: "Processing..."
+                },
+                es: {
+                    title: "OCR PDF",
+                    description: "Convierta archivos PDF no seleccionables en PDF seleccionables y buscables con alta precisión.",
+                    selectButton: "Seleccionar archivo PDF",
+                    dropText: "o suelte el PDF aquí",
+                    successTitle: "¡Proceso OCR completado!",
+                    successMessage: "Su PDF ha sido procesado con OCR y ahora es buscable.",
+                    downloadButton: "Descargar PDF con OCR",
+                    backButton: "Procesar otro PDF",
+                    footer: "© PDF Tools 2025 • Su editor de PDF",
+                    processing: "Procesando..."
+                },
+                fr: {
+                    title: "OCR PDF",
+                    description: "Convertissez des fichiers PDF non sélectionnables en PDF sélectionnables et consultables avec une grande précision.",
+                    selectButton: "Sélectionner un fichier PDF",
+                    dropText: "ou déposez le PDF ici",
+                    successTitle: "Processus OCR terminé!",
+                    successMessage: "Votre PDF a été traité avec OCR et est maintenant consultable.",
+                    downloadButton: "Télécharger le PDF OCR",
+                    backButton: "Traiter un autre PDF",
+                    footer: "© PDF Tools 2025 • Votre éditeur PDF",
+                    processing: "Traitement en cours..."
+                },
+                de: {
+                    title: "OCR PDF",
+                    description: "Konvertieren Sie nicht auswählbare PDF-Dateien mit hoher Genauigkeit in auswählbare und durchsuchbare PDFs.",
+                    selectButton: "PDF-Datei auswählen",
+                    dropText: "oder PDF hier ablegen",
+                    successTitle: "OCR-Prozess abgeschlossen!",
+                    successMessage: "Ihre PDF wurde mit OCR verarbeitet und ist jetzt durchsuchbar.",
+                    downloadButton: "OCR-PDF herunterladen",
+                    backButton: "Weitere PDF verarbeiten",
+                    footer: "© PDF Tools 2025 • Ihr PDF-Editor",
+                    processing: "Wird verarbeitet..."
+                },
+                it: {
+                    title: "OCR PDF",
+                    description: "Converti file PDF non selezionabili in PDF selezionabili e ricercabili con alta precisione.",
+                    selectButton: "Seleziona file PDF",
+                    dropText: "o trascina il PDF qui",
+                    successTitle: "Processo OCR completato!",
+                    successMessage: "Il tuo PDF è stato elaborato con OCR ed ora è ricercabile.",
+                    downloadButton: "Scarica PDF OCR",
+                    backButton: "Elabora un altro PDF",
+                    footer: "© PDF Tools 2025 • Il tuo editor PDF",
+                    processing: "Elaborazione in corso..."
+                },
+                pt: {
+                    title: "OCR PDF",
+                    description: "Converta arquivos PDF não selecionáveis em PDF selecionáveis e pesquisáveis com alta precisão.",
+                    selectButton: "Selecionar arquivo PDF",
+                    dropText: "ou solte o PDF aqui",
+                    successTitle: "Processo OCR concluído!",
+                    successMessage: "Seu PDF foi processado com OCR e agora é pesquisável.",
+                    downloadButton: "Baixar PDF OCR",
+                    backButton: "Processar outro PDF",
+                    footer: "© PDF Tools 2025 • Seu editor de PDF",
+                    processing: "Processando..."
+                },
+                ru: {
+                    title: "OCR PDF",
+                    description: "Преобразуйте невыбираемые PDF-файлы в выбираемые и доступные для поиска PDF-файлы с высокой точностью.",
+                    selectButton: "Выбрать PDF-файл",
+                    dropText: "или перетащите PDF сюда",
+                    successTitle: "Процесс OCR завершен!",
+                    successMessage: "Ваш PDF был обработан с помощью OCR и теперь доступен для поиска.",
+                    downloadButton: "Скачать OCR PDF",
+                    backButton: "Обработать другой PDF",
+                    footer: "© PDF Tools 2025 • Ваш PDF-редактор",
+                    processing: "Обработка..."
+                },
+                zh: {
+                    title: "OCR PDF",
+                    description: "以高精度将不可选择的PDF文件转换为可选择和可搜索的PDF。",
+                    selectButton: "选择PDF文件",
+                    dropText: "或将PDF拖放到此处",
+                    successTitle: "OCR处理完成！",
+                    successMessage: "您的PDF已通过OCR处理，现在可搜索。",
+                    downloadButton: "下载OCR PDF",
+                    backButton: "处理另一个PDF",
+                    footer: "© PDF Tools 2025 • 您的PDF编辑器",
+                    processing: "处理中..."
+                },
+                ja: {
+                    title: "OCR PDF",
+                    description: "選択不可能なPDFファイルを、高精度で選択可能かつ検索可能なPDFに変換します。",
+                    selectButton: "PDFファイルを選択",
+                    dropText: "またはPDFをここにドロップ",
+                    successTitle: "OCR処理が完了しました！",
+                    successMessage: "あなたのPDFはOCRで処理され、検索可能になりました。",
+                    downloadButton: "OCR PDFをダウンロード",
+                    backButton: "別のPDFを処理",
+                    footer: "© PDF Tools 2025 • PDFエディタ",
+                    processing: "処理中..."
+                },
+                hi: {
+                    title: "OCR PDF",
+                    description: "उच्च सटीकता के साथ गैर-चयन योग्य PDF फाइलों को चयन योग्य और खोज योग्य PDF में बदलें।",
+                    selectButton: "PDF फाइल चुनें",
+                    dropText: "या PDF यहां ड्रॉप करें",
+                    successTitle: "OCR प्रक्रिया पूरी हुई!",
+                    successMessage: "आपकी PDF को OCR के साथ संसाधित किया गया है और अब यह खोज योग्य है।",
+                    downloadButton: "OCR PDF डाउनलोड करें",
+                    backButton: "दूसरी PDF प्रक्रिया करें",
+                    footer: "© PDF Tools 2025 • आपका PDF संपादक",
+                    processing: "प्रसंस्करण..."
+                }
+            };
+            
+            // Language selection functionality
+            languageBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                languageDropdown.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function() {
+                languageDropdown.classList.remove('show');
+            });
+            
+            languageDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            languageOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const lang = this.getAttribute('data-lang');
+                    changeLanguage(lang);
+                    
+                    // Update active class
+                    languageOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update current language text
+                    currentLanguage.textContent = this.querySelector('span:last-child').textContent;
+                    
+                    // Close dropdown
+                    languageDropdown.classList.remove('show');
+                });
+            });
+            
+            function changeLanguage(lang) {
+                const elements = document.querySelectorAll('[data-translate]');
+                
+                elements.forEach(element => {
+                    const key = element.getAttribute('data-translate');
+                    if (translations[lang] && translations[lang][key]) {
+                        element.textContent = translations[lang][key];
+                    }
+                });
+            }
+            
+            // File selection button
+            selectBtn.addEventListener('click', () => fileInput.click());
+            
+            // File input change
+            fileInput.addEventListener('change', ev => handleFiles(ev.target.files));
+            
+            // Drag & drop functionality
+            ['dragenter', 'dragover'].forEach(evt => {
+                dropZone.addEventListener(evt, e => {
+                    e.preventDefault();
+                    dropZone.classList.add('active');
+                });
+            });
+            
+            ['dragleave', 'drop'].forEach(evt => {
+                dropZone.addEventListener(evt, e => {
+                    e.preventDefault();
+                    dropZone.classList.remove('active');
+                });
+            });
+            
+            dropZone.addEventListener('drop', e => {
+                const dt = e.dataTransfer;
+                if (dt && dt.files && dt.files.length) handleFiles(dt.files);
+            });
+            
+            // Back button
+            backBtn.addEventListener('click', () => {
+                uploadSection.style.display = 'block';
+                resultSection.style.display = 'none';
+                fileInput.value = '';
+                progressBar.style.width = '0%';
+                downloadLink.style.display = 'none';
+            });
+            
+            // Handle file processing
+            function handleFiles(files) {
+                if (!files || !files.length) return;
+                const file = files[0];
+                
+                // Validate file type
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (ext !== 'pdf' && file.type !== 'application/pdf') {
+                    alert('Please choose a PDF file.');
+                    return;
+                }
+                
+                // Update result section with file info
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                
+                // Switch to result section
+                uploadSection.style.display = 'none';
+                resultSection.style.display = 'block';
+                progressText.textContent = translations[currentLanguage.textContent.toLowerCase()]?.processing || 'Processing...';
+                
+                // Simulate OCR processing
+                simulateOCRProcess(file);
+            }
+            
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Simulate OCR process
+            function simulateOCRProcess(file) {
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.floor(Math.random() * 10) + 5;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(interval);
+                        
+                        // OCR process complete
+                        progressText.textContent = 'OCR Complete!';
+                        createDownloadPlaceholder(file.name);
+                    }
+                    
+                    progressBar.style.width = progress + '%';
+                    progressText.textContent = `Processing: ${progress}%`;
+                }, 300);
+            }
+            
+            // Create download placeholder (in real app, this would be the actual OCR processed file)
+            function createDownloadPlaceholder(origName) {
+                const base = origName.replace(/\.pdf$/i, '');
+                const filename = base ? base + '_ocr.pdf' : 'ocr_result.pdf';
+                
+                // Create a simple text file that simulates an OCR processed PDF
+                const content = `This is a simulation of an OCR processed PDF converted from  a real application, this would be the actual PDF file with searchable text extracted through OCR technology.`;
+                const blob = new Blob([content], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                
+                downloadLink.href = url;
+                downloadLink.download = filename;
+                downloadLink.style.display = 'inline-block';
+            }
+        });
+    </script>
+</body>
+</html>
