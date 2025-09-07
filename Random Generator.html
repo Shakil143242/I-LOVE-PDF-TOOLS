@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random Number & Password Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f3f3f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      margin: 40px auto;
+      padding: 30px;
+      max-width: 700px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input, select, button {
+      padding: 10px;
+      margin: 8px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Random Number & Password Generator</h1>
+    
+    <h2>Random Number</h2>
+    <input type="number" id="min" placeholder="Min" value="1">
+    <input type="number" id="max" placeholder="Max" value="100">
+    <button onclick="generateNumber()">Generate Number</button><br>
+
+    <h2>Password Generator</h2>
+    <input type="number" id="passLength" placeholder="Password Length" value="12">
+    <select id="passType">
+      <option value="alphanumeric">Alphanumeric</option>
+      <option value="numeric">Numeric</option>
+      <option value="letters">Letters Only</option>
+      <option value="special">Special Characters</option>
+    </select>
+    <button onclick="generatePassword()">Generate Password</button><br>
+
+    <div id="result">Generated value will appear here...</div>
+    <button onclick="copyResult()">Copy to Clipboard</button>
+  </div>
+
+  <script>
+    function generateNumber() {
+      const min = parseInt(document.getElementById('min').value);
+      const max = parseInt(document.getElementById('max').value);
+      if (isNaN(min) || isNaN(max) || min > max) {
+        alert("Please enter valid min and max numbers!");
+        return;
+      }
+      const num = Math.floor(Math.random() * (max - min + 1)) + min;
+      document.getElementById('result').innerText = num;
+    }
+
+    function generatePassword() {
+      const length = parseInt(document.getElementById('passLength').value);
+      const type = document.getElementById('passType').value;
+      if (isNaN(length) || length < 1) {
+        alert("Please enter a valid password length!");
+        return;
+      }
+
+      let chars = '';
+      if (type === 'alphanumeric') chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      else if (type === 'numeric') chars = '0123456789';
+      else if (type === 'letters') chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+      else if (type === 'special') chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}<>?';
+
+      let password = '';
+      for (let i = 0; i < length; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+
+      document.getElementById('result').innerText = password;
+    }
+
+    function copyResult() {
+      const result = document.getElementById('result').innerText;
+      navigator.clipboard.writeText(result).then(() => {
+        alert("Copied to clipboard!");
+      }).catch(err => {
+        alert("Failed to copy!");
+      });
+    }
+  </script>
+</body>
+</html>
