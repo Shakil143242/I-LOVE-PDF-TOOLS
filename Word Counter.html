@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Counter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f3f3f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      margin: 40px auto;
+      padding: 30px;
+      max-width: 900px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      margin-bottom: 20px;
+      resize: vertical;
+    }
+
+    button {
+      margin: 10px;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    .stats {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .stats p {
+      font-size: 16px;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Word Counter</h1>
+    <textarea id="inputText" placeholder="Paste or type your text here..."></textarea>
+    
+    <div>
+      <button onclick="countWords()">Count</button>
+      <button onclick="clearText()">Clear</button>
+    </div>
+
+    <div id="result" class="stats"></div>
+  </div>
+
+  <script>
+    function countWords() {
+      let text = document.getElementById('inputText').value;
+      if (!text.trim()) {
+        alert("Please enter some text first!");
+        return;
+      }
+
+      let words = text.trim().match(/\b\w+\b/g) || [];
+      let characters = text.length;
+      let charactersNoSpaces = text.replace(/\s/g, "").length;
+      let sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+      let paragraphs = text.split(/\n+/).filter(p => p.trim().length > 0).length;
+
+      document.getElementById('result').innerHTML = `
+        <p><b>Total Words:</b> ${words.length}</p>
+        <p><b>Total Characters (with spaces):</b> ${characters}</p>
+        <p><b>Total Characters (without spaces):</b> ${charactersNoSpaces}</p>
+        <p><b>Total Sentences:</b> ${sentences}</p>
+        <p><b>Total Paragraphs:</b> ${paragraphs}</p>
+      `;
+    }
+
+    function clearText() {
+      document.getElementById('inputText').value = "";
+      document.getElementById('result').innerHTML = "";
+    }
+  </script>
+</body>
+</html>
