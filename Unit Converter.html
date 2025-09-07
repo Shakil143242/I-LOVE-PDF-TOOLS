@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unit Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f3f3f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      margin: 40px auto;
+      padding: 30px;
+      max-width: 700px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input, select, button {
+      padding: 10px;
+      margin: 8px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Unit Converter</h1>
+    
+    <input type="number" id="inputValue" placeholder="Enter value">
+    <select id="unitType">
+      <option value="length">Length (m, km, cm, inch, ft)</option>
+      <option value="weight">Weight (kg, g, lb, oz)</option>
+      <option value="temperature">Temperature (°C, °F, K)</option>
+    </select><br>
+
+    <select id="fromUnit"></select>
+    <select id="toUnit"></select><br>
+
+    <button onclick="convert()">Convert</button>
+    <button onclick="clearAll()">Clear</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const units = {
+      length: ['m', 'km', 'cm', 'inch', 'ft'],
+      weight: ['kg', 'g', 'lb', 'oz'],
+      temperature: ['°C', '°F', 'K']
+    };
+
+    const fromUnit = document.getElementById('fromUnit');
+    const toUnit = document.getElementById('toUnit');
+    const unitType = document.getElementById('unitType');
+
+    function populateUnits() {
+      fromUnit.innerHTML = '';
+      toUnit.innerHTML = '';
+      units[unitType.value].forEach(u => {
+        fromUnit.innerHTML += `<option value="${u}">${u}</option>`;
+        toUnit.innerHTML += `<option value="${u}">${u}</option>`;
+      });
+    }
+
+    unitType.addEventListener('change', populateUnits);
+    populateUnits();
+
+    function convert() {
+      let val = parseFloat(document.getElementById('inputValue').value);
+      if (isNaN(val)) {
+        alert("Please enter a valid number!");
+        return;
+      }
+      const from = fromUnit.value;
+      const to = toUnit.value;
+      let result;
+
+      // Length conversion
+      if (unitType.value === 'length') {
+        const conv = { m:1, km:1000, cm:0.01, inch:0.0254, ft:0.3048 };
+        result = val * conv[from] / conv[to];
+      }
+
+      // Weight conversion
+      else if (unitType.value === 'weight') {
+        const conv = { kg:1, g:0.001, lb:0.453592, oz:0.0283495 };
+        result = val * conv[from] / conv[to];
+      }
+
+      // Temperature conversion
+      else if (unitType.value === 'temperature') {
+        if (from === to) result = val;
+        else if (from === '°C') result = to === '°F' ? val*9/5+32 : val+273.15;
+        else if (from === '°F') result = to === '°C' ? (val-32)*5/9 : (val-32)*5/9+273.15;
+        else if (from === 'K') result = to === '°C' ? val-273.15 : (val-273.15)*9/5+32;
+      }
+
+      document.getElementById('result').innerText = `${val} ${from} = ${result.toFixed(4)} ${to}`;
+    }
+
+    function clearAll() {
+      document.getElementById('inputValue').value = '';
+      document.getElementById('result').innerText = '';
+    }
+  </script>
+</body>
+</html>
