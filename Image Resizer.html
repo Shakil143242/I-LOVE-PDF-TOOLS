@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Resizer Online</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f3f3f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      margin: 50px auto;
+      padding: 30px;
+      max-width: 450px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input, button {
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    #preview {
+      margin-top: 20px;
+      max-width: 100%;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Image Resizer</h1>
+    <input type="file" id="upload" accept="image/*">
+
+    <input type="number" id="width" placeholder="Width in px">
+    <input type="number" id="height" placeholder="Height in px">
+
+    <button onclick="resizeImage()">Resize & Download</button>
+    <img id="preview" src="" alt="">
+  </div>
+
+  <script>
+    function resizeImage() {
+      const fileInput = document.getElementById('upload');
+      const width = parseInt(document.getElementById('width').value);
+      const height = parseInt(document.getElementById('height').value);
+
+      if (!fileInput.files.length) {
+        alert("Please upload an image first!");
+        return;
+      }
+
+      if (!width || !height) {
+        alert("Please enter both width and height!");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const dataURL = canvas.toDataURL("image/png");
+          document.getElementById('preview').src = dataURL;
+
+          const link = document.createElement('a');
+          link.href = dataURL;
+          link.download = "resized_image.png";
+          link.click();
+        }
+      }
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
