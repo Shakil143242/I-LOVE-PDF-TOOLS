@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f3f3f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      margin: 40px auto;
+      padding: 30px;
+      max-width: 700px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input[type="text"] {
+      width: 70%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    #barcode {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Barcode Generator</h1>
+    <input type="text" id="barcodeText" placeholder="Enter text or number...">
+    <button onclick="generateBarcode()">Generate Barcode</button>
+    <button onclick="clearBarcode()">Clear</button>
+    <div id="barcode"></div>
+  </div>
+
+  <!-- JsBarcode Library -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+  <script>
+    function generateBarcode() {
+      const text = document.getElementById("barcodeText").value.trim();
+      if (!text) {
+        alert("Please enter text or number!");
+        return;
+      }
+      document.getElementById("barcode").innerHTML = "<svg id='barcodeSvg'></svg>";
+      JsBarcode("#barcodeSvg", text, {
+        format: "CODE128",
+        lineColor: "#000",
+        width: 2,
+        height: 80,
+        displayValue: true
+      });
+    }
+
+    function clearBarcode() {
+      document.getElementById("barcodeText").value = "";
+      document.getElementById("barcode").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
