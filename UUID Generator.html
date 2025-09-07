@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UUID Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f3f3f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      margin: 40px auto;
+      padding: 30px;
+      max-width: 700px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input[type="number"] {
+      width: 100px;
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-right: 10px;
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    #result {
+      margin-top: 20px;
+      text-align: left;
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>UUID Generator</h1>
+    <input type="number" id="uuidCount" placeholder="Count" min="1" max="100" value="1">
+    <button onclick="generateUUIDs()">Generate</button>
+    <button onclick="clearResult()">Clear</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    function generateUUID() {
+      // Generates UUIDv4
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    function generateUUIDs() {
+      const count = parseInt(document.getElementById('uuidCount').value) || 1;
+      if (count < 1 || count > 100) {
+        alert("Please enter a number between 1 and 100!");
+        return;
+      }
+      let uuids = [];
+      for (let i = 0; i < count; i++) {
+        uuids.push(generateUUID());
+      }
+      document.getElementById('result').innerText = uuids.join('\n');
+    }
+
+    function clearResult() {
+      document.getElementById('uuidCount').value = "1";
+      document.getElementById('result').innerText = "";
+    }
+  </script>
+</body>
+</html>
