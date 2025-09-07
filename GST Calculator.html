@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GST Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f3f3f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      margin: 50px auto;
+      padding: 30px;
+      max-width: 450px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input, button, select {
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #222;
+      text-align: left;
+    }
+
+    .result-box {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>GST Calculator</h1>
+    <input type="number" id="amount" placeholder="Enter Amount (₹)">
+    
+    <select id="gstRate">
+      <option value="5">GST 5%</option>
+      <option value="12">GST 12%</option>
+      <option value="18" selected>GST 18%</option>
+      <option value="28">GST 28%</option>
+    </select>
+
+    <select id="type">
+      <option value="add">Add GST to Amount</option>
+      <option value="remove">Remove GST from Amount</option>
+    </select>
+
+    <button onclick="calculateGST()">Calculate</button>
+
+    <div id="result" class="result-box"></div>
+  </div>
+
+  <script>
+    function calculateGST() {
+      const amount = parseFloat(document.getElementById('amount').value);
+      const gstRate = parseFloat(document.getElementById('gstRate').value);
+      const type = document.getElementById('type').value;
+
+      if (!amount || !gstRate) {
+        alert("Please enter amount and select GST rate.");
+        return;
+      }
+
+      let gstAmount, total;
+
+      if (type === "add") {
+        gstAmount = (amount * gstRate) / 100;
+        total = amount + gstAmount;
+        document.getElementById('result').innerHTML = `
+          ✅ Original Amount: ₹${amount.toFixed(2)} <br>
+          ✅ GST (${gstRate}%): ₹${gstAmount.toFixed(2)} <br>
+          ✅ Total Amount: <b>₹${total.toFixed(2)}</b>
+        `;
+      } else {
+        gstAmount = (amount * gstRate) / (100 + gstRate);
+        const baseAmount = amount - gstAmount;
+        document.getElementById('result').innerHTML = `
+          ✅ Total (Including GST): ₹${amount.toFixed(2)} <br>
+          ✅ GST (${gstRate}%): ₹${gstAmount.toFixed(2)} <br>
+          ✅ Base Amount: <b>₹${baseAmount.toFixed(2)}</b>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
