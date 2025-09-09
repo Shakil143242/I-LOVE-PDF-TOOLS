@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessibility Contrast Checker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 800px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .color-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .control-group h3 {
+            color: #1a2a6c;
+            font-size: 1.3rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .color-input {
+            width: 70px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 0;
+            background: none;
+        }
+        
+        .color-input::-webkit-color-swatch {
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        
+        .color-input::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        
+        .color-code {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .color-code:focus {
+            border-color: #1a2a6c;
+            box-shadow: 0 0 0 3px rgba(26, 42, 108, 0.1);
+        }
+        
+        .preview {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .contrast-preview {
+            height: 200px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #000000, #ffffff);
+            overflow: hidden;
+        }
+        
+        .preview-text {
+            font-size: 2.2rem;
+            font-weight: 700;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+        }
+        
+        .results h3 {
+            margin-bottom: 20px;
+            color: #1a2a6c;
+            font-size: 1.3rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .ratio-display {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .ratio-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #1a2a6c;
+            line-height: 1;
+            margin: 15px 0;
+        }
+        
+        .ratio-label {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .compliance {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .compliance-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .compliance-item h4 {
+            color: #444;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .compliance-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .compliance-pass {
+            color: #2ecc71;
+        }
+        
+        .compliance-fail {
+            color: #e74c3c;
+        }
+        
+        .guidelines {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .guidelines h4 {
+            color: #1a2a6c;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .guidelines-list {
+            list-style: none;
+        }
+        
+        .guidelines-list li {
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+            font-size: 0.95rem;
+        }
+        
+        .guidelines-list li:before {
+            content: "•";
+            color: #1a2a6c;
+            font-weight: bold;
+            position: absolute;
+            left: 10px;
+        }
+        
+        .swap-btn {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .swap-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 42, 108, 0.3);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #2ecc71;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .text-size {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .text-btn {
+            padding: 12px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .text-btn.active {
+            background: #1a2a6c;
+            color: white;
+            border-color: #1a2a6c;
+        }
+        
+        .rating {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-accessibility"></i> Accessibility Contrast Checker</h1>
+            <p>Ensure your color combinations meet WCAG accessibility standards</p>
+        </div>
+        
+        <div class="content">
+            <div class="color-controls">
+                <div class="control-group">
+                    <h3>Text Color</h3>
+                    <div class="color-picker">
+                        <input type="color" id="textColor" class="color-input" value="#000000">
+                        <input type="text" id="textColorValue" class="color-code" value="#000000" maxlength="7">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Background Color</h3>
+                    <div class="color-picker">
+                        <input type="color" id="bgColor" class="color-input" value="#ffffff">
+                        <input type="text" id="bgColorValue" class="color-code" value="#ffffff" maxlength="7">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Text Size</h3>
+                    <div class="text-size">
+                        <button class="text-btn active" id="normalText">Normal Text</button>
+                        <button class="text-btn" id="largeText">Large Text</button>
+                    </div>
+                </div>
+                
+                <button class="swap-btn" id="swapBtn">
+                    <i class="fas fa-exchange-alt"></i> Swap Colors
+                </button>
+            </div>
+            
+            <div class="preview">
+                <div class="contrast-preview" id="contrastPreview">
+                    <div class="preview-text" id="previewText">
+                        Sample Text for Contrast Preview
+                    </div>
+                </div>
+                
+                <div class="results">
+                    <h3>Contrast Results</h3>
+                    <div class="ratio-display">
+                        <div class="ratio-label">Contrast Ratio</div>
+                        <div class="ratio-value" id="ratioValue">21.00</div>
+                        <div class="rating" id="rating">Perfect</div>
+                    </div>
+                    
+                    <div class="compliance">
+                        <div class="compliance-item">
+                            <h4>WCAG AA</h4>
+                            <div class="compliance-value compliance-pass" id="wcagAA">PASS</div>
+                        </div>
+                        <div class="compliance-item">
+                            <h4>WCAG AAA</h4>
+                            <div class="compliance-value compliance-pass" id="wcagAAA">PASS</div>
+                        </div>
+                    </div>
+                    
+                    <div class="guidelines">
+                        <h4>WCAG Contrast Guidelines</h4>
+                        <ul class="guidelines-list">
+                            <li>AA requires contrast ratio of at least 4.5:1 for normal text</li>
+                            <li>AA requires contrast ratio of at least 3:1 for large text</li>
+                            <li>AAA requires contrast ratio of at least 7:1 for normal text</li>
+                            <li>AAA requires contrast ratio of at least 4.5:1 for large text</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast">Colors swapped successfully!</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const textColor = document.getElementById('textColor');
+            const textColorValue = document.getElementById('textColorValue');
+            const bgColor = document.getElementById('bgColor');
+            const bgColorValue = document.getElementById('bgColorValue');
+            const contrastPreview = document.getElementById('contrastPreview');
+            const previewText = document.getElementById('previewText');
+            const ratioValue = document.getElementById('ratioValue');
+            const wcagAA = document.getElementById('wcagAA');
+            const wcagAAA = document.getElementById('wcagAAA');
+            const swapBtn = document.getElementById('swapBtn');
+            const toast = document.getElementById('toast');
+            const normalTextBtn = document.getElementById('normalText');
+            const largeTextBtn = document.getElementById('largeText');
+            const rating = document.getElementById('rating');
+            
+            // Text size state
+            let isLargeText = false;
+            
+            // Initialize with default values
+            updateContrast();
+            
+            // Event listeners
+            textColor.addEventListener('input', updateFromColorInput);
+            bgColor.addEventListener('input', updateFromColorInput);
+            textColorValue.addEventListener('input', updateFromTextInput);
+            bgColorValue.addEventListener('input', updateFromTextInput);
+            swapBtn.addEventListener('click', swapColors);
+            normalTextBtn.addEventListener('click', () => setTextSize(false));
+            largeTextBtn.addEventListener('click', () => setTextSize(true));
+            
+            // Update from color input
+            function updateFromColorInput(e) {
+                if (e.target.id === 'textColor') {
+                    textColorValue.value = e.target.value;
+                } else {
+                    bgColorValue.value = e.target.value;
+                }
+                updateContrast();
+            }
+            
+            // Update from text input
+            function updateFromTextInput(e) {
+                const value = e.target.value;
+                if (!isValidHexColor(value)) return;
+                
+                if (e.target.id === 'textColorValue') {
+                    textColor.value = value;
+                } else {
+                    bgColor.value = value;
+                }
+                updateContrast();
+            }
+            
+            // Validate hex color
+            function isValidHexColor(color) {
+                return /^#([0-9A-F]{3}){1,2}$/i.test(color);
+            }
+            
+            // Swap colors
+            function swapColors() {
+                const tempColor = textColor.value;
+                textColor.value = bgColor.value;
+                bgColor.value = tempColor;
+                
+                textColorValue.value = textColor.value;
+                bgColorValue.value = bgColor.value;
+                
+                updateContrast();
+                showToast();
+            }
+            
+            // Set text size
+            function setTextSize(large) {
+                isLargeText = large;
+                normalTextBtn.classList.toggle('active', !large);
+                largeTextBtn.classList.toggle('active', large);
+                
+                // Update text size in preview
+                previewText.style.fontSize = large ? '2.5rem' : '2.2rem';
+                previewText.style.fontWeight = large ? '700' : '400';
+                
+                updateContrast();
+            }
+            
+            // Calculate contrast ratio
+            function calculateContrastRatio(hex1, hex2) {
+                // Convert hex to RGB
+                const r1 = parseInt(hex1.substring(1, 3), 16) / 255;
+                const g1 = parseInt(hex1.substring(3, 5), 16) / 255;
+                const b1 = parseInt(hex1.substring(5, 7), 16) / 255;
+                
+                const r2 = parseInt(hex2.substring(1, 3), 16) / 255;
+                const g2 = parseInt(hex2.substring(3, 5), 16) / 255;
+                const b2 = parseInt(hex2.substring(5, 7), 16) / 255;
+                
+                // Calculate relative luminance
+                const luminance1 = calculateLuminance(r1, g1, b1);
+                const luminance2 = calculateLuminance(r2, g2, b2);
+                
+                // Calculate contrast ratio
+                const lighter = Math.max(luminance1, luminance2);
+                const darker = Math.min(luminance1, luminance2);
+                return (lighter + 0.05) / (darker + 0.05);
+            }
+            
+            // Calculate luminance
+            function calculateLuminance(r, g, b) {
+                const [rs, gs, bs] = [r, g, b].map(c => {
+                    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+                });
+                return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+            }
+            
+            // Update contrast display
+            function updateContrast() {
+                const textHex = textColor.value;
+                const bgHex = bgColor.value;
+                
+                // Update preview
+                contrastPreview.style.background = bgHex;
+                previewText.style.color = textHex;
+                
+                // Calculate contrast ratio
+                const ratio = calculateContrastRatio(textHex, bgHex);
+                const ratioFormatted = ratio.toFixed(2);
+                
+                // Update ratio display
+                ratioValue.textContent = ratioFormatted + ':1';
+                
+                // Determine rating
+                if (ratio >= 7) {
+                    rating.textContent = 'Perfect';
+                    rating.style.background = '#2ecc71';
+                    rating.style.color = 'white';
+                } else if (ratio >= 4.5) {
+                    rating.textContent = 'Good';
+                    rating.style.background = '#3498db';
+                    rating.style.color = 'white';
+                } else if (ratio >= 3) {
+                    rating.textContent = 'Fair';
+                    rating.style.background = '#f39c12';
+                    rating.style.color = 'white';
+                } else {
+                    rating.textContent = 'Poor';
+                    rating.style.background = '#e74c3c';
+                    rating.style.color = 'white';
+                }
+                
+                // Check compliance
+                const aaMin = isLargeText ? 3 : 4.5;
+                const aaaMin = isLargeText ? 4.5 : 7;
+                
+                const passesAA = ratio >= aaMin;
+                const passesAAA = ratio >= aaaMin;
+                
+                wcagAA.textContent = passesAA ? 'PASS' : 'FAIL';
+                wcagAA.className = passesAA ? 'compliance-value compliance-pass' : 'compliance-value compliance-fail';
+                
+                wcagAAA.textContent = passesAAA ? 'PASS' : 'FAIL';
+                wcagAAA.className = passesAAA ? 'compliance-value compliance-pass' : 'compliance-value compliance-fail';
+            }
+            
+            // Show toast notification
+            function showToast() {
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
